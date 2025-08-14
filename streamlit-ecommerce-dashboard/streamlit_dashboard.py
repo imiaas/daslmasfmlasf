@@ -12,27 +12,67 @@ st.set_page_config(
 )
 
 # --- Helper Functions to Load Data --- #
+import os
+import pandas as pd
+import streamlit as st
+
+# --- Helper Functions to Load Data ---
+import os
+import pandas as pd
+import streamlit as st
+
+# --- Helper Functions to Load Data ---
 @st.cache_data
-def load_data_from_excel(file_path, sheet_name):
+def load_data_from_excel(local_path, github_url=None):
     try:
-        df = pd.read_excel(file_path, sheet_name=sheet_name)
-        return df
-    except FileNotFoundError:
-        st.error(f"Error: Excel file not found at {file_path}. Please ensure dummy data is generated.")
-        return pd.DataFrame()
+        if os.path.exists(local_path):
+            df = pd.read_excel(local_path, engine="openpyxl")
+            return df
+        elif github_url:
+            df = pd.read_excel(github_url, engine="openpyxl")
+            return df
+        else:
+            st.error(f"File not found: {local_path}")
+            return pd.DataFrame()
     except Exception as e:
-        st.error(f"Error loading data from sheet '{sheet_name}': {e}")
+        st.error(f"Error loading file '{local_path}': {e}")
         return pd.DataFrame()
 
-# --- Load All DataFrames from a single Excel file --- #
-dummy_data_dir = "./dummy_data"
-excel_file = os.path.join(dummy_data_dir, "ecommerce_data.xlsx")
+# --- Base directory (lokal) ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+dummy_data_dir = os.path.join(BASE_DIR, "dummy_data")
 
-df_customers = load_data_from_excel(excel_file, "customers")
-df_vendors = load_data_from_excel(excel_file, "vendors")
-df_inventory = load_data_from_excel(excel_file, "inventory")
-df_transactions = load_data_from_excel(excel_file, "transaction")
-df_shipping = load_data_from_excel(excel_file, "shipping")
+# --- GitHub raw base URL ---
+# Ganti USERNAME & REPO sesuai punyamu
+github_base_url = "https://raw.githubusercontent.com/imiaas/daslmasfmlasf/streamlit-ecommerce-dashboard/dummy_data"
+
+# --- Load each Excel file ---
+df_customers = load_data_from_excel(
+    os.path.join(dummy_data_dir, "customers.xlsx"),
+    f"{github_base_url}/customers.xlsx"
+)
+
+df_vendors = load_data_from_excel(
+    os.path.join(dummy_data_dir, "vendors.xlsx"),
+    f"{github_base_url}/vendors.xlsx"
+)
+
+df_inventory = load_data_from_excel(
+    os.path.join(dummy_data_dir, "inventory.xlsx"),
+    f"{github_base_url}/inventory.xlsx"
+)
+
+df_transactions = load_data_from_excel(
+    os.path.join(dummy_data_dir, "transaction.xlsx"),
+    f"{github_base_url}/transaction.xlsx"
+)
+
+df_shipping = load_data_from_excel(
+    os.path.join(dummy_data_dir, "shipping.xlsx"),
+    f"{github_base_url}/shipping.xlsx"
+)
+
+
 
 # --- Data Preprocessing (if DataFrames are not empty) --- #
 if not df_transactions.empty:
